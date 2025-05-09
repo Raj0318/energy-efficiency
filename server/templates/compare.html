@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Appliance Energy Comparison</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f1f3f5;
+            padding: 2rem;
+        }
+
+        .form-container {
+            max-width: 700px;
+            margin: auto;
+            padding: 2rem;
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        form label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        form input[type="text"],
+        form input[type="number"] {
+            width: 100%;
+            padding: 0.75rem;
+            margin-bottom: 1.5rem;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+
+        button {
+            width: 100%;
+            padding: 0.75rem;
+            background-color: #28a745;
+            color: white;
+            font-size: 1rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #218838;
+        }
+
+        .note {
+            text-align: center;
+            margin-top: 1rem;
+            color: #555;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <h1>⚡ Compare Appliance Energy Usage</h1>
+        <form action="/compare" method="post">
+            <label for="appliance1">Appliance 1 Name:</label>
+            <input type="text" id="appliance1" name="appliance1" required>
+
+            <label for="power1">Power (W):</label>
+            <input type="number" id="power1" name="power1" required>
+
+            <label for="hours1">Hours per Day:</label>
+            <input type="number" id="hours1" name="hours1" step="0.1" required>
+
+            <label for="days1">Days per Year:</label>
+            <input type="number" id="days1" name="days1" required>
+
+            <label for="appliance2">Appliance 2 Name:</label>
+            <input type="text" id="appliance2" name="appliance2" required>
+
+            <label for="power2">Power (W):</label>
+            <input type="number" id="power2" name="power2" required>
+
+            <label for="hours2">Hours per Day:</label>
+            <input type="number" id="hours2" name="hours2" step="0.1" required>
+
+            <label for="days2">Days per Year:</label>
+            <input type="number" id="days2" name="days2" required>
+
+            <button type="submit">Compare Energy Usage</button>
+        </form>
+        <p class="note">Enter values accurately to get the most reliable comparison.</p>
+    </div>
+</body>
+</html>
