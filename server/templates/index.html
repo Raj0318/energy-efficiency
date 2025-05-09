@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Energy Consumption Comparison</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+
+    <div class="container">
+        <h1>Compare Energy Consumption of Appliances</h1>
+
+        <form method="POST">
+            <div class="input-group">
+                <label for="appliance1">Appliance 1:</label>
+                <input type="text" id="appliance1" name="appliance1" required>
+            </div>
+
+            <div class="input-group">
+                <label for="power1">Power (in watts):</label>
+                <input type="number" id="power1" name="power1" required>
+            </div>
+
+            <div class="input-group">
+                <label for="hours1">Hours per day:</label>
+                <input type="number" id="hours1" name="hours1" required>
+            </div>
+
+            <div class="input-group">
+                <label for="days1">Days per week:</label>
+                <input type="number" id="days1" name="days1" required>
+            </div>
+
+            <div class="input-group">
+                <label for="appliance2">Appliance 2:</label>
+                <input type="text" id="appliance2" name="appliance2" required>
+            </div>
+
+            <div class="input-group">
+                <label for="power2">Power (in watts):</label>
+                <input type="number" id="power2" name="power2" required>
+            </div>
+
+            <div class="input-group">
+                <label for="hours2">Hours per day:</label>
+                <input type="number" id="hours2" name="hours2" required>
+            </div>
+
+            <div class="input-group">
+                <label for="days2">Days per week:</label>
+                <input type="number" id="days2" name="days2" required>
+            </div>
+
+            <button type="submit">Compare</button>
+        </form>
+
+        {% if result %}
+            <h2>Result:</h2>
+            <p>{{ result }}</p>
+            <h3>Energy Details:</h3>
+            <p>{{ appliance1_name }}: {{ energy1 }} kWh</p>
+            <p>{{ appliance2_name }}: {{ energy2 }} kWh</p>
+        {% endif %}
+
+        <h3>History of Comparisons:</h3>
+        <ul>
+            {% for item in history %}
+                <li>
+                    <strong>{{ item.name1 }} vs {{ item.name2 }}:</strong>
+                    <p>{{ item.result }}</p>
+                    <p>{{ item.name1 }}: {{ item.energy1 }} kWh, {{ item.name2 }}: {{ item.energy2 }} kWh</p>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <script>
+        // Toggle Dark Mode
+        const toggleMode = () => {
+            document.body.classList.toggle('dark-mode');
+        }
+    </script>
+
+</body>
+</html>

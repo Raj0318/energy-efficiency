@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Energy Consumption Comparison</title>
+    <style>
+        :root {
+            --bg-color: #f4f4f9;
+            --text-color: #333;
+            --card-bg: white;
+        }
+
+        body.dark {
+            --bg-color: #1e1e2f;
+            --text-color: #f4f4f9;
+            --card-bg: #2a2a3b;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .container {
+            width: 80%;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: var(--card-bg);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            margin-top: 50px;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 2.5em;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        label {
+            font-size: 1.1em;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        button {
+            padding: 10px;
+            font-size: 1em;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        .result, .history {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: var(--bg-color);
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .history-item {
+            margin-bottom: 10px;
+            padding: 10px;
+            background-color: #e9e9e9;
+            border-radius: 4px;
+        }
+
+        .toggle-switch {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 20px;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: 0.4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: 0.4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: #4CAF50;
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+
+        canvas {
+            margin-top: 20px;
+            width: 100%;
+            height: 400px;
+        }
+    </style>
+</head>
+<body>
+    <div class="toggle-switch">
+        <label class="switch">
+            <input type="checkbox" id="modeToggle">
+            <span class="slider"></span>
+        </label>
+        <span class="toggle-label">Dark Mode</span>
+    </div>
+
+    <div class="container">
+        <h1>Compare Energy Consumption</h1>
+        <form method="POST">
+            <label>Appliance 1:</label>
+            <input type="text" name="appliance1" placeholder="Name" required>
+            <input type="number" name="power1" placeholder="Power (in watts)" required>
+            <input type="number" name="hours1" placeholder="Hours per day" required>
+            <input type="number" name="days1" placeholder="Days per week" required>
+
+            <label>Appliance 2:</label>
+            <input type="text" name="appliance2" placeholder="Name" required>
+            <input type="number" name="power2" placeholder="Power (in watts)" required>
+            <input type="number" name="hours2" placeholder="Hours per day" required>
+            <input type="number" name="days2" placeholder="Days per week" required>
+
+            <button type="submit">Compare</button>
+        </form>
+
+        {% if result %}
+        <div class="result">
+            <h2>Result:</h2>
+            <p>{{ result }}</p>
+
+            <h3>Energy Details:</h3>
+            <p>{{ appliance1_name }}: {{ energy1 }} kWh</p>
+            <p>{{ appliance2_name }}: {{ energy2 }} kWh</p>
+
+            <canvas id="energyChart"></canvas>
+        </div>
+        {% endif %}
+
+        {% if history %}
+        <div class="history">
+            <h2>History of Comparisons:</h2>
+            {% for entry in history %}
+            <div class="history-item">
+                <strong>{{ entry['appliance1'] }} vs {{ entry['appliance2'] }}:</strong><br>
+                {{ entry['result'] }}<br>
+                {{ entry['appliance1'] }}: {{ entry['energy1'] }} kWh,
+                {{ entry['appliance2'] }}: {{ entry['energy2'] }} kWh
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        const toggle = document.getElementById('modeToggle');
+        toggle.addEventListener('change', () => {
+            document.body.classList.toggle('dark');
+        });
+
+        {% if result %}
+        const ctx = document.getElementById('energyChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['{{ appliance1_name }}', '{{ appliance2_name }}'],
+                datasets: [{
+                    label: 'Energy Consumption (kWh)',
+                    data: [{{ energy1|tojson }}, {{ energy2|tojson }}], // Convert to JSON for safe rendering
+                    borderColor: '#4CAF50',
+                    backgroundColor: 'rgba(76, 175, 80, 0.2)',
+                    fill: true,
+                    tension: 0.3
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        labels: {
+                            color: getComputedStyle(document.body).getPropertyValue('--text-color')
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        ticks: {
+                            color: getComputedStyle(document.body).getPropertyValue('--text-color')
+                        }
+                    },
+                    x: {
+                        ticks: {
+                            color: getComputedStyle(document.body).getPropertyValue('--text-color')
+                        }
+                    }
+                }
+            }
+        });
+        {% endif %}
+    </script>
+</body>
+</html>
